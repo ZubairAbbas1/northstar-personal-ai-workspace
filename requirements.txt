@@ -1,5 +1,5 @@
 # Orchestration & AI
-langgraph>=0.2.0
+langgraph>=1.2.11
 langchain>=0.3.0
 langchain-core>=0.3.0
 langchain-groq>=0.2.0

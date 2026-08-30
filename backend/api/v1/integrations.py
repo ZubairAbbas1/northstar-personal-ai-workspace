@@ -22,6 +22,7 @@ from backend.integrations.discord import (
     normalize_bot_token,
     validate_discord_bot,
 )
+from backend.integrations.slack import SlackConnectionError, validate_slack_user_token
 from backend.services.crypto_service import crypto_service
 from backend.services.oauth_service import (
     GOOGLE_SCOPES,
@@ -39,7 +40,7 @@ AVAILABLE_INTEGRATIONS = [
     {"id": "gmail", "name": "Gmail", "category": "Communication", "description": "Read and triage your inbox, then draft replies for your review.", "icon": "mail", "supported_scopes": ["Read email", "Search inbox", "Draft replies"], "is_available": True, "token_guide": "Use Google OAuth or a Google App Password."},
     {"id": "google_calendar", "name": "Google Calendar", "category": "Planning", "description": "Bring today's meetings and schedule context into your workspace.", "icon": "calendar", "supported_scopes": ["Read events", "Meeting context"], "is_available": True, "token_guide": "Use Google OAuth for Calendar access."},
     {"id": "github", "name": "GitHub", "category": "Development", "description": "Connect repository, pull request, and issue context.", "icon": "github", "supported_scopes": ["Read repositories", "Read issues and pull requests"], "is_available": True, "token_guide": "Use GitHub OAuth or a fine-grained personal access token."},
-    {"id": "slack", "name": "Slack", "category": "Communication", "description": "Connect workspace messages and mention context using a Slack token.", "icon": "message-square", "supported_scopes": ["Read channels", "Read mentions"], "is_available": True, "token_guide": "Use a Bot or User OAuth Token from your Slack app."},
+    {"id": "slack", "name": "Slack", "category": "Communication", "description": "Read your recent Slack mentions using a user-scoped Slack token.", "icon": "message-square", "supported_scopes": ["Search messages mentioning you"], "is_available": True, "token_guide": "Use a User OAuth Token beginning with xoxp- and the search:read user scope."},
     {"id": "discord", "name": "Discord", "category": "Communication", "description": "Read recent messages from only the server channels you select.", "icon": "discord", "supported_scopes": ["List servers", "Read selected channels", "Read message history"], "is_available": True, "token_guide": "Paste a bot token from the Discord Developer Portal. Never use your personal Discord account token."},
 ]
 INTEGRATIONS_BY_ID = {item["id"]: item for item in AVAILABLE_INTEGRATIONS}
@@ -194,6 +195,23 @@ async def connect_integration(provider: str, data: ConnectIntegrationRequest, cu
         )
         return _response(meta, account)
 
+    if provider == "slack":
+        try:
+            identity = await validate_slack_user_token(token)
+        except SlackConnectionError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        label = f"{identity['user']} · {identity['team']}"
+        account = await _upsert_account(
+            db,
+            current_user.id,
+            provider,
+            label,
+            token,
+            scopes=["search:read"],
+            metadata={"user_id": identity.get("user_id"), "team_id": identity.get("team_id")},
+        )
+        return _response(meta, account)
+
     headers = {"Authorization": f"Bearer {token}", "User-Agent": "Northstar-Workspace"}
     try:
         async with httpx.AsyncClient(timeout=10) as client:
@@ -201,13 +219,6 @@ async def connect_integration(provider: str, data: ConnectIntegrationRequest, cu
                 response = await client.get("https://api.github.com/user", headers=headers)
                 response.raise_for_status()
                 label = f"@{response.json()['login']}"
-            elif provider == "slack":
-                response = await client.post("https://slack.com/api/auth.test", headers=headers)
-                response.raise_for_status()
-                payload = response.json()
-                if not payload.get("ok"):
-                    raise ValueError(payload.get("error") or "Slack rejected the token")
-                label = f"{payload.get('user', 'Slack')} · {payload.get('team', 'Workspace')}"
             else:
                 raise HTTPException(status_code=400, detail="Unsupported connection method")
     except (httpx.HTTPError, KeyError, ValueError) as exc:

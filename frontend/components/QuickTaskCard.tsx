@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Clock, Calendar as CalendarIcon, Tag } from "lucide-react";
+import { Check, Clock, Calendar as CalendarIcon } from "lucide-react";
 import { cn, formatDate, getPriorityBadgeColor } from "@/lib/utils";
 import { api } from "@/lib/api";
 

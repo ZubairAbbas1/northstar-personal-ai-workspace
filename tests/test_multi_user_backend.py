@@ -20,6 +20,7 @@ from backend.services.oauth_service import create_oauth_state, parse_oauth_state
 from backend.integrations.calendar import GoogleCalendarError
 from backend.integrations.gmail import GmailConnectionError
 from backend.integrations.discord import _get as discord_get
+from backend.integrations.slack import SlackConnectionError, fetch_slack_mentions, validate_slack_user_token
 from backend.models.integration import IntegrationAccount
 from backend.models.user import User
 
@@ -148,6 +149,47 @@ def test_assistant_routes_github_questions_to_connected_context():
 
 def test_assistant_routes_discord_questions_to_selected_channels():
     assert detect_intent("What is the latest message in Discord?") == "discord"
+
+
+def test_assistant_routes_slack_questions_to_connected_context():
+    assert detect_intent("What is my latest Slack mention?") == "slack"
+
+
+@pytest.mark.asyncio
+async def test_slack_requires_user_token_and_search_scope(monkeypatch):
+    with pytest.raises(SlackConnectionError, match="User OAuth Token"):
+        await validate_slack_user_token("xoxb-unit-test-bot-token")
+
+    calls: list[tuple[str, dict | None]] = []
+
+    class FakeSlackClient:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+        async def request(self, method, url, headers=None, params=None):
+            api_method = url.rsplit("/", 1)[-1]
+            calls.append((api_method, params))
+            payload = (
+                {"ok": True, "user": "Zubair", "team": "Northstar", "user_id": "U1", "team_id": "T1"}
+                if api_method == "auth.test"
+                else {"ok": True, "messages": {"matches": []}}
+            )
+            return httpx.Response(200, request=httpx.Request(method, url), json=payload)
+
+    monkeypatch.setattr("backend.integrations.slack.httpx.AsyncClient", lambda **kwargs: FakeSlackClient())
+    identity = await validate_slack_user_token("xoxp-unit-test-user-token")
+    mentions = await fetch_slack_mentions({"access_token": "xoxp-unit-test-user-token"})
+
+    assert identity == {"user": "Zubair", "team": "Northstar", "user_id": "U1", "team_id": "T1"}
+    assert mentions == []
+    assert calls == [
+        ("auth.test", None),
+        ("search.messages", {"query": "to:me", "count": 1}),
+        ("search.messages", {"query": "to:me", "count": 10, "sort": "timestamp", "sort_dir": "desc"}),
+    ]
 
 
 @pytest.mark.asyncio
@@ -287,6 +329,60 @@ async def test_discord_connection_channel_allow_list_and_assistant(client, db_se
     assert answer.json()["intent"] == "discord"
     assert "launch checklist" in answer.json()["response"]
     assert answer.json()["sources_used"] == ["discord"]
+
+
+@pytest.mark.asyncio
+async def test_slack_connection_and_assistant_mentions(client, db_session, monkeypatch):
+    response = await client.post("/api/v1/auth/register", json={
+        "email": "slack-assistant@example.com",
+        "password": "Password123!",
+        "full_name": "Slack Assistant",
+    })
+    headers = {"Authorization": f"Bearer {response.json()['access_token']}"}
+
+    async def validate_user_token(token: str):
+        assert token == "xoxp-unit-test-user-token"
+        return {"user": "Zubair", "team": "Northstar", "user_id": "U1", "team_id": "T1"}
+
+    monkeypatch.setattr("backend.api.v1.integrations.validate_slack_user_token", validate_user_token)
+    connected = await client.post(
+        "/api/v1/integrations/slack/connect",
+        headers=headers,
+        json={"connection_type": "token", "token_or_key": "xoxp-unit-test-user-token"},
+    )
+    assert connected.status_code == 200
+    assert connected.json()["status"] == "connected"
+    assert "Zubair · Northstar" == connected.json()["account_email_or_id"]
+    assert "xoxp-unit-test-user-token" not in connected.text
+
+    user = (await db_session.execute(select(User).where(User.email == "slack-assistant@example.com"))).scalar_one()
+    account = (await db_session.execute(select(IntegrationAccount).where(
+        IntegrationAccount.user_id == user.id,
+        IntegrationAccount.provider == "slack",
+    ))).scalar_one()
+    assert decrypt_secret(account.encrypted_access_token) == "xoxp-unit-test-user-token"
+    assert json.loads(account.scopes) == ["search:read"]
+
+    async def recent_mentions(token_data):
+        assert token_data == {"access_token": "xoxp-unit-test-user-token"}
+        return [{
+            "text": "Please review the launch checklist.",
+            "username": "Alex",
+            "channel": "product",
+            "permalink": "https://example.slack.com/archives/C1/p1",
+            "ts": "1770000000.000100",
+        }]
+
+    monkeypatch.setattr("backend.api.v1.assistant.fetch_slack_mentions", recent_mentions)
+    answer = await client.post(
+        "/api/v1/assistant/chat",
+        headers=headers,
+        json={"message": "What is my latest Slack mention?"},
+    )
+    assert answer.status_code == 200
+    assert answer.json()["intent"] == "slack"
+    assert "launch checklist" in answer.json()["response"]
+    assert answer.json()["sources_used"] == ["slack"]
 
 
 def test_oauth_state_is_signed_and_provider_bound():

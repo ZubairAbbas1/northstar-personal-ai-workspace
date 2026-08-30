@@ -23,6 +23,7 @@ from backend.integrations.github import (
     fetch_github_repositories,
 )
 from backend.integrations.discord import DiscordConnectionError, fetch_discord_messages
+from backend.integrations.slack import SlackConnectionError, fetch_slack_mentions
 from backend.models.integration import IntegrationAccount
 from backend.models.memory import Memory
 from backend.models.project import Project
@@ -33,7 +34,7 @@ from services.priority_scoring import score_tasks
 
 router = APIRouter(prefix="/assistant", tags=["AI Assistant"])
 logger = logging.getLogger(__name__)
-Intent = Literal["what_next", "morning_brief", "smart_inbox", "meeting_prep", "calendar_query", "github", "discord", "universal_search", "memory", "general"]
+Intent = Literal["what_next", "morning_brief", "smart_inbox", "meeting_prep", "calendar_query", "github", "slack", "discord", "universal_search", "memory", "general"]
 
 
 class ChatRequest(BaseModel):
@@ -66,6 +67,8 @@ def detect_intent(message: str) -> Intent:
         return "calendar_query"
     if any(word in text for word in ("github", "repo", "repository", "repositories", "pull request")):
         return "github"
+    if "slack" in text:
+        return "slack"
     if "discord" in text:
         return "discord"
     if any(word in text for word in ("search", "find", "where did")):
@@ -337,6 +340,57 @@ async def chat_with_assistant(
                 intent=intent,
                 response=str(exc),
                 sources_used=["github"],
+            )
+
+    if intent == "slack":
+        result = await db.execute(
+            select(IntegrationAccount).where(
+                IntegrationAccount.user_id == current_user.id,
+                IntegrationAccount.provider == "slack",
+            )
+        )
+        account = result.scalar_one_or_none()
+        if not account or not account.encrypted_access_token:
+            return ChatResponse(
+                thread_id=thread_id,
+                intent=intent,
+                response="Slack is not connected. Connect a Slack User OAuth Token from Integrations first.",
+            )
+
+        token = crypto_service.decrypt(account.encrypted_access_token) or ""
+        query = data.message.lower()
+        try:
+            mentions = await fetch_slack_mentions({"access_token": token})
+            if not mentions:
+                response = "Slack is connected, but I found no recent messages matching `to:me`."
+            elif any(phrase in query for phrase in ("latest", "newest", "most recent", "last mention")):
+                mention = mentions[0]
+                response = (
+                    f"Your latest Slack mention is in **#{mention['channel']}**.\n\n"
+                    f"**{mention['username']}:** {mention['text'] or 'Message text is unavailable.'}"
+                )
+            else:
+                lines = []
+                for mention in mentions[:10]:
+                    text = mention["text"] or "Message text is unavailable."
+                    if len(text) > 240:
+                        text = text[:237].rstrip() + "..."
+                    lines.append(f"• **#{mention['channel']} — {mention['username']}:** {text}")
+                response = f"I found {len(lines)} recent Slack mention{'s' if len(lines) != 1 else ''}:\n\n" + "\n".join(lines)
+            if account.status != "connected" or account.error_message:
+                account.status = "connected"
+                account.error_message = None
+                await db.commit()
+            return ChatResponse(thread_id=thread_id, intent=intent, response=response, sources_used=["slack"])
+        except SlackConnectionError as exc:
+            account.status = "needs_reauth" if exc.requires_reauth else "connected"
+            account.error_message = str(exc)
+            await db.commit()
+            return ChatResponse(
+                thread_id=thread_id,
+                intent=intent,
+                response=str(exc),
+                sources_used=["slack"],
             )
 
     if intent == "discord":

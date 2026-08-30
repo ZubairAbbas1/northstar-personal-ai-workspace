@@ -1,6 +1,6 @@
 # Northstar — Personal AI Workspace
 
-[![Next.js](https://img.shields.io/badge/Frontend-Next.js_14-black.svg?logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js_16-black.svg?logo=next.js)](https://nextjs.org/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/Orchestration-LangGraph-blue.svg)](https://github.com/langchain-ai/langgraph)
 [![SQLite / PostgreSQL](https://img.shields.io/badge/Database-SQLite_%2F_Postgres-336791.svg)](https://sqlite.org/)
@@ -11,7 +11,7 @@ An open-source, self-hosted, multi-user **AI Executive Assistant & Productivity 
 
 > **"One intelligent workspace that understands what is happening across your work and helps you determine what deserves your attention next."**
 
-Built with **Next.js 14 (TypeScript and Tailwind CSS)**, **FastAPI (Python 3.11)**, a tenant-safe assistant gateway, **Model Context Protocol (MCP)** workflows, and an **AES-256-GCM BYOK Vault**.
+Built with **Next.js 16 (TypeScript and Tailwind CSS)**, **FastAPI (Python 3.11)**, a tenant-safe assistant gateway, **Model Context Protocol (MCP)** workflows, and an **AES-256-GCM BYOK Vault**.
 
 ## Self-hosted by design
 
@@ -58,7 +58,7 @@ See [SELF_HOSTING.md](SELF_HOSTING.md) for the complete localhost installation a
 
 ```mermaid
 graph TD
-    U[User Browser] -->|HTTPS / REST| FE[Next.js 14 Web Frontend]
+    U[User Browser] -->|HTTPS / REST| FE[Next.js 16 Web Frontend]
 
     subgraph "FastAPI Backend Gateway"
         FE --> API[FastAPI Gateway]
@@ -167,6 +167,17 @@ When you open the application, you'll be greeted by the **3-Step Connection Wiza
 
 GitHub OAuth uses `{BACKEND_PUBLIC_URL}/api/v1/integrations/github/callback`. If OAuth credentials are absent, the API reports that the provider is not configured instead of returning a fake consent URL.
 
+### How to Connect Slack
+
+1. Create a Slack app for the workspace from the [Slack API Apps dashboard](https://api.slack.com/apps).
+2. In **OAuth & Permissions**, add the `search:read` **User Token Scope**.
+3. Install or reinstall the app to the workspace.
+4. Copy the **User OAuth Token** beginning with `xoxp-`—not the Bot User OAuth Token beginning with `xoxb-`.
+5. Open Northstar **Integrations**, choose Slack, and paste the user token.
+6. Ask the assistant for your latest Slack mention or recent Slack mentions.
+
+Northstar validates both the token identity and `search:read` access before showing Slack as connected. The token is encrypted at rest. Current Slack support is read-only and limited to messages returned by Slack's `to:me` search; Northstar does not send Slack messages.
+
 ### How to Connect Discord
 
 1. Create an application and bot in the [Discord Developer Portal](https://discord.com/developers/applications).
@@ -191,7 +202,7 @@ Run the full automated test suite covering multi-tenant auth, user task isolatio
 pytest
 ```
 
-**41 tests passing**:
+**44 tests passing**:
 - Multi-user authentication & JWT validation
 - User data isolation (cross-tenant safety)
 - AES-256-GCM secret vault encryption & decryption
@@ -199,6 +210,7 @@ pytest
 - Model factory provider resolution & quality mode routing
 - Smart Inbox, Meeting Prep, and Morning Brief workflows
 - Read-only Discord bot connection, channel allow-list, and assistant routing
+- Slack user-token scope validation, mention retrieval, and assistant routing
 - Tenant-isolated assistant, memory, and universal search
 - Cross-tenant project/task reference protection
 - Signed, expiring, provider-bound OAuth state

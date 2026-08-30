@@ -4,7 +4,7 @@
 
 **Version:** 1.0.0
 **Project type:** Multi-user personal productivity and AI assistant web application
-**Frontend:** Next.js 14, React 18, TypeScript, Tailwind CSS
+**Frontend:** Next.js 16, React 18, TypeScript, Tailwind CSS
 **Backend:** FastAPI, Python 3.11+, SQLAlchemy 2
 **Local database:** SQLite
 **Production database:** PostgreSQL
@@ -107,11 +107,13 @@ Supported priorities:
 
 ### Slack
 
-- Accept and validate a Slack Bot or User OAuth token.
-- Retrieve mention context using Slack search when the token and workspace permissions support it.
+- Accept and validate a Slack User OAuth token beginning with `xoxp-`.
+- Require the `search:read` user scope before marking the connection active.
+- Retrieve recent `to:me` mention context using Slack search.
+- Answer recent and latest Slack-mention questions in the assistant.
 - Expose Slack notification preferences.
 
-Slack currently has less UI and assistant coverage than Gmail, Google Calendar, and GitHub. Treat it as a supported connection with limited workspace surfacing, not as a complete Slack client.
+Slack support is intentionally read-only and limited to mention search. Northstar does not act as a complete Slack client and does not post messages.
 
 ### AI assistant
 
@@ -120,6 +122,7 @@ The assistant combines deterministic workspace actions with an AI model:
 - Inbox summaries and latest-email questions use live Gmail data.
 - Calendar questions use live Google Calendar data.
 - GitHub questions use live GitHub data.
+- Slack mention questions use live Slack search data.
 - Priority questions use saved tasks and workspace context.
 - Morning briefs combine the available workspace signals.
 - Meeting-preparation questions use calendar context.
@@ -313,7 +316,7 @@ python -c "import secrets; print(secrets.token_urlsafe(48))"
 ### Prerequisites
 
 - Python 3.11 or newer
-- Node.js 18 or newer
+- Node.js 20.9 or newer
 - npm
 - A modern browser
 - Google and GitHub developer credentials only if those integrations are needed
@@ -619,7 +622,7 @@ cd E:\RAG\personal-ai-assistant
 Current verification snapshot on 30 August 2026:
 
 ```text
-41 passed in 10.58s
+44 passed
 ```
 
 The test suite covers authentication, tenant isolation, integrations, assistant routing, date-aware calendar behavior, GitHub and Discord behavior, security boundaries, and core API features.
@@ -784,7 +787,7 @@ Only stop it if it is the stale Northstar process you intended to replace.
 
 ## 17. Current limitations
 
-- Slack connection and mention retrieval exist, but Slack is not as deeply integrated into the frontend and assistant as Gmail, Calendar, and GitHub.
+- Slack connection, validated `search:read` scope, mention retrieval, and assistant responses are implemented; broader channel browsing and message posting are intentionally out of scope.
 - Document upload, chunking, embeddings, and semantic document Q&A are not yet a complete web feature, despite legacy RAG code and dependencies in the repository.
 - Assistant conversations do not currently provide a durable, user-visible history of full multi-turn threads across browser sessions.
 - Gmail reply generation is draft-only; sending and mailbox mutation are intentionally not automated.
@@ -802,7 +805,7 @@ These limitations are deliberate places for future development and should not be
 
 1. Add persistent assistant conversation history.
 2. Finish document upload and retrieval-augmented generation in the web interface.
-3. Expand Slack views, mention summaries, and assistant routing.
+3. Add an optional one-click Slack OAuth flow for self-hosted deployments.
 4. Add Alembic database migrations.
 5. Add background synchronization and scheduled notification workers.
 6. Add browser end-to-end tests for login, OAuth status, tasks, and assistant flows.
@@ -821,7 +824,7 @@ The application is a working full-stack MVP, not a static mockup:
 - Gmail, Google Calendar, GitHub, and Discord are connected to live provider APIs.
 - The assistant can route supported workspace questions to live data.
 - AI provider configuration is implemented.
-- The automated backend suite currently passes all 41 tests.
+- The automated backend suite currently passes all 44 tests.
 
 Production deployment still requires operator-owned secrets, public HTTPS URLs, production OAuth callbacks, a PostgreSQL instance, monitoring, backups, and the production checklist above.
 

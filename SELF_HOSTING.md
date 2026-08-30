@@ -18,7 +18,7 @@ Requirements:
 
 - Git
 - Python 3.11 or newer
-- Node.js 20 or newer
+- Node.js 20.9 or newer
 
 ```bash
 git clone https://github.com/ZubairAbbas1/northstar-personal-ai-workspace.git
@@ -119,6 +119,21 @@ For Gmail only, a Google App Password is also supported when two-step verificati
 4. In Northstar, open **Integrations**, paste the bot token, and select up to ten readable channels.
 
 Use a bot token only—never a personal Discord account token. Northstar's current Discord integration is read-only and uses the explicit channel allow-list.
+
+## Connect Slack
+
+Slack is connected per Northstar user through a Slack **User OAuth Token**. This is a manual token flow for self-hosted installations; `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET` are reserved for a future one-click Slack OAuth flow and are not required today.
+
+1. Create a Slack app at the [Slack API Apps dashboard](https://api.slack.com/apps) and select the workspace you want to connect.
+2. Open **OAuth & Permissions**.
+3. Under **User Token Scopes**, add `search:read`.
+4. Install or reinstall the app to the workspace so the new scope is granted.
+5. Copy the **User OAuth Token** beginning with `xoxp-`.
+6. In Northstar, open **Integrations**, connect Slack, and paste that token.
+
+Do not paste a Bot User OAuth Token beginning with `xoxb-`; Slack's `search.messages` method requires a user token with `search:read`. Northstar checks the token with Slack's `auth.test` and verifies mention-search access before saving it. You can then ask the assistant for recent or latest Slack mentions.
+
+The Slack connection is read-only. It searches messages matching `to:me`, returns up to ten recent matches, and never posts messages or changes the workspace.
 
 ## Configure AI
 

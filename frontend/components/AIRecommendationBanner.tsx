@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, ArrowRight, Clock, Target, CheckCircle2, RefreshCw } from "lucide-react";
+import { Sparkles, ArrowRight, Clock, CheckCircle2, RefreshCw } from "lucide-react";
 import { api } from "@/lib/api";
 
 export function AIRecommendationBanner() {

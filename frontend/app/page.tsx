@@ -18,7 +18,7 @@ const statStyles = {
 export default function DashboardPage() {
   const router = useRouter(); const { user, isLoading } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]); const [inbox, setInbox] = useState<any>(null); const [calendar, setCalendar] = useState<any>(null); const [integrations, setIntegrations] = useState<any[]>([]); const [loading, setLoading] = useState(true);
-  useEffect(() => { if (!isLoading && !user) router.replace("/login"); else if (user) Promise.all([api.getTasks().catch(() => []), api.getInbox().catch(() => null), api.getTodayCalendar().catch(() => null), api.getIntegrations().catch(() => [])]).then(([taskData, inboxData, calendarData, integrationData]) => { setTasks(taskData); setInbox(inboxData); setCalendar(calendarData); setIntegrations(integrationData); }).finally(() => setLoading(false)); }, [user, isLoading]);
+  useEffect(() => { if (!isLoading && !user) router.replace("/login"); else if (user) Promise.all([api.getTasks().catch(() => []), api.getInbox().catch(() => null), api.getTodayCalendar().catch(() => null), api.getIntegrations().catch(() => [])]).then(([taskData, inboxData, calendarData, integrationData]) => { setTasks(taskData); setInbox(inboxData); setCalendar(calendarData); setIntegrations(integrationData); }).finally(() => setLoading(false)); }, [user, isLoading, router]);
 
   const openTasks = useMemo(() => tasks.filter(task => !["completed", "cancelled"].includes(task.status)), [tasks]);
   const priority = useMemo(() => [...openTasks].sort((a, b) => ({ urgent: 4, high: 3, medium: 2, low: 1 }[b.priority as "urgent"] || 0) - ({ urgent: 4, high: 3, medium: 2, low: 1 }[a.priority as "urgent"] || 0))[0], [openTasks]);

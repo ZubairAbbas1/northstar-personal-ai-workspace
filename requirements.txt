@@ -12,6 +12,13 @@ fastmcp>=0.1.0
 langsmith>=0.1.0
 langgraph-cli[inmem]
 
+# Keep LangGraph's OpenTelemetry exporters on the same release line. Without
+# these constraints, pip can retain older exporters alongside a newer SDK.
+opentelemetry-sdk==1.37.0
+opentelemetry-exporter-otlp-proto-http==1.37.0
+opentelemetry-exporter-otlp-proto-grpc==1.37.0
+opentelemetry-exporter-prometheus==0.58b0
+
 # Backend & API
 fastapi>=0.110.0
 uvicorn[standard]>=0.28.0

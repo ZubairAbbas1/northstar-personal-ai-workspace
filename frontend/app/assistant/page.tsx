@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, CalendarDays, CheckSquare2, Github, Inbox, Loader2, Send, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { api } from "@/lib/api";
@@ -21,8 +21,8 @@ export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([{ id: "welcome", role: "assistant", text: "I’m ready. Ask about your priorities, tasks, inbox, meetings, GitHub, search, or saved memory." }]);
   const [input, setInput] = useState(""); const [loading, setLoading] = useState(false); const [threadId] = useState(() => crypto.randomUUID()); const end = useRef<HTMLDivElement>(null); const initialPromptHandled = useRef(false);
   useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
-  const send = async (value?: string) => { const text = (value || input).trim(); if (!text || loading) return; setInput(""); setMessages(items => [...items, { id: crypto.randomUUID(), role: "user", text }]); setLoading(true); try { const response = await api.chat(text, threadId, "balanced", new Date().getTimezoneOffset()); setMessages(items => [...items, { id: crypto.randomUUID(), role: "assistant", text: response.response, sources: response.sources_used }]); } catch (err: any) { setMessages(items => [...items, { id: crypto.randomUUID(), role: "assistant", text: err.message || "The assistant is unavailable." }]); } finally { setLoading(false); } };
-  useEffect(() => { if (initialPromptHandled.current) return; const prompt = new URLSearchParams(window.location.search).get("prompt"); if (prompt) { initialPromptHandled.current = true; window.history.replaceState({}, "", "/assistant"); send(prompt); } }, []);
+  const send = useCallback(async (value?: string) => { const text = (value || input).trim(); if (!text || loading) return; setInput(""); setMessages(items => [...items, { id: crypto.randomUUID(), role: "user", text }]); setLoading(true); try { const response = await api.chat(text, threadId, "balanced", new Date().getTimezoneOffset()); setMessages(items => [...items, { id: crypto.randomUUID(), role: "assistant", text: response.response, sources: response.sources_used }]); } catch (err: any) { setMessages(items => [...items, { id: crypto.randomUUID(), role: "assistant", text: err.message || "The assistant is unavailable." }]); } finally { setLoading(false); } }, [input, loading, threadId]);
+  useEffect(() => { if (initialPromptHandled.current) return; const prompt = new URLSearchParams(window.location.search).get("prompt"); if (prompt) { initialPromptHandled.current = true; window.history.replaceState({}, "", "/assistant"); send(prompt); } }, [send]);
 
   return <AppShell title="Ask Northstar" description="A calm way into everything in your workspace." commandMode="full"><div className="mx-auto flex min-h-[560px] max-w-4xl flex-col overflow-hidden rounded-[18px] border border-[#E4E3F5] bg-white shadow-[0_10px_32px_rgba(27,27,47,.04)]">
     <div className="flex items-center gap-3 border-b border-[#F0F0F7] px-5 py-3.5"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#6C5CE7] text-white"><Sparkles className="h-4 w-4" /></span><div><p className="text-[12px] font-semibold text-[#1B1B2F]">Northstar Assistant</p><p className="flex items-center gap-1.5 text-[9px] text-[#00846F]"><span className="beacon h-1.5 w-1.5 rounded-full bg-[#00C2A8]" />Grounded in your account</p></div></div>

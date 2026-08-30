@@ -1,0 +1,37 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+secrets/
+tokens/
+
+chroma_db/
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+.runlogs/
+.langgraph_api/
+.ruff_cache/
+.mypy_cache/
+
+# Frontend build and dependency artifacts
+frontend/node_modules/
+frontend/.next/
+frontend/.next-dev/
+node_modules/
+.next/
+
+# Local runtime data
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+Thumbs.db
+
+# Local editor settings
+.idea/
+.vscode/

@@ -1,0 +1,33 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Bot, CalendarDays, CheckSquare2, Github, Inbox, Loader2, Send, Sparkles } from "lucide-react";
+import { AppShell } from "@/components/AppShell";
+import { api } from "@/lib/api";
+
+type Message = { id: string; role: "user" | "assistant"; text: string; sources?: string[] };
+const prompts = ["What should I do next?", "Brief me for today", "What is my latest email?", "Prepare me for my next meeting"];
+function RichText({ text }: { text: string }) { return <>{text.split("**").map((part, index) => index % 2 ? <strong key={index} className="font-semibold text-[#1B1B2F]">{part}</strong> : <span key={index}>{part}</span>)}</>; }
+
+function ContextCard({ message }: { message: Message }) {
+  const source = (message.sources || [])[0]?.toLowerCase();
+  if (!source) return null;
+  const meta = source.includes("calendar") ? { label: "Schedule", icon: CalendarDays, tone: "bg-[#E3FBF7] text-[#00846F]" } : source.includes("gmail") || source.includes("inbox") ? { label: "Inbox", icon: Inbox, tone: "bg-[#FFEAE8] text-[#C4392E]" } : source.includes("github") ? { label: "GitHub", icon: Github, tone: "bg-[#EEEDFE] text-[#4C3FBF]" } : source.includes("task") ? { label: "Tasks", icon: CheckSquare2, tone: "bg-[#FFF4E0] text-[#9A6500]" } : null;
+  if (!meta) return null; const Icon = meta.icon;
+  return <div className={`mb-3 flex items-center gap-2 rounded-xl px-3 py-2 ${meta.tone}`}><Icon className="h-3.5 w-3.5" /><span className="text-[9px] font-semibold uppercase tracking-[.12em]">Live {meta.label} context</span></div>;
+}
+
+export default function AssistantPage() {
+  const [messages, setMessages] = useState<Message[]>([{ id: "welcome", role: "assistant", text: "I’m ready. Ask about your priorities, tasks, inbox, meetings, GitHub, search, or saved memory." }]);
+  const [input, setInput] = useState(""); const [loading, setLoading] = useState(false); const [threadId] = useState(() => crypto.randomUUID()); const end = useRef<HTMLDivElement>(null); const initialPromptHandled = useRef(false);
+  useEffect(() => { end.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  const send = async (value?: string) => { const text = (value || input).trim(); if (!text || loading) return; setInput(""); setMessages(items => [...items, { id: crypto.randomUUID(), role: "user", text }]); setLoading(true); try { const response = await api.chat(text, threadId, "balanced", new Date().getTimezoneOffset()); setMessages(items => [...items, { id: crypto.randomUUID(), role: "assistant", text: response.response, sources: response.sources_used }]); } catch (err: any) { setMessages(items => [...items, { id: crypto.randomUUID(), role: "assistant", text: err.message || "The assistant is unavailable." }]); } finally { setLoading(false); } };
+  useEffect(() => { if (initialPromptHandled.current) return; const prompt = new URLSearchParams(window.location.search).get("prompt"); if (prompt) { initialPromptHandled.current = true; window.history.replaceState({}, "", "/assistant"); send(prompt); } }, []);
+
+  return <AppShell title="Ask Northstar" description="A calm way into everything in your workspace." commandMode="full"><div className="mx-auto flex min-h-[560px] max-w-4xl flex-col overflow-hidden rounded-[18px] border border-[#E4E3F5] bg-white shadow-[0_10px_32px_rgba(27,27,47,.04)]">
+    <div className="flex items-center gap-3 border-b border-[#F0F0F7] px-5 py-3.5"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[#6C5CE7] text-white"><Sparkles className="h-4 w-4" /></span><div><p className="text-[12px] font-semibold text-[#1B1B2F]">Northstar Assistant</p><p className="flex items-center gap-1.5 text-[9px] text-[#00846F]"><span className="beacon h-1.5 w-1.5 rounded-full bg-[#00C2A8]" />Grounded in your account</p></div></div>
+    <div className="soft-scrollbar flex-1 space-y-5 overflow-y-auto bg-[#FBFBFE] px-4 py-6 sm:px-7">{messages.map(message => <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}>{message.role === "assistant" && <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#EEEDFE] text-[#6C5CE7]"><Bot className="h-3.5 w-3.5" /></span>}<div className={`max-w-[84%] rounded-[14px] px-4 py-3 text-[13px] leading-6 ${message.role === "user" ? "rounded-br-[5px] bg-[#1B1B2F] text-white" : "rounded-bl-[5px] border border-[#F0F0F7] bg-white text-[#4D4C61] shadow-[0_4px_16px_rgba(27,27,47,.035)]"}`}><ContextCard message={message} /><p className="whitespace-pre-wrap"><RichText text={message.text} /></p>{message.sources && message.sources.length > 1 && <div className="mt-3 flex flex-wrap gap-1.5">{message.sources.slice(1).map(source => <span key={source} className="mono rounded-full bg-[#F7F7FC] px-2 py-0.5 text-[8px] font-medium text-[#9291A5] ring-1 ring-[#E4E3F5]">{source}</span>)}</div>}</div></div>)}{loading && <div className="flex items-center gap-3 text-[10px] text-[#9291A5]"><Loader2 className="h-3.5 w-3.5 animate-spin text-[#6C5CE7]" />Looking across your workspace…</div>}<div ref={end} /></div>
+    {messages.length === 1 && <div className="border-t border-[#F0F0F7] bg-white px-4 pb-3 pt-3 sm:px-7"><div className="flex flex-wrap gap-2">{prompts.map(prompt => <button key={prompt} onClick={() => send(prompt)} className="rounded-full border border-[#E4E3F5] bg-white px-3 py-1.5 text-[9px] font-medium text-[#6B6B80] transition hover:border-[#6C5CE7]/30 hover:bg-[#EEEDFE] hover:text-[#4C3FBF]">{prompt}</button>)}</div></div>}
+    <div className="sticky bottom-0 border-t border-[#F0F0F7] bg-white p-3 sm:p-4"><form onSubmit={event => { event.preventDefault(); send(); }} className="flex items-end gap-2 rounded-[14px] border border-[#E4E3F5] bg-[#F7F7FC] p-2 transition focus-within:border-[#6C5CE7] focus-within:bg-white focus-within:ring-4 focus-within:ring-[#6C5CE7]/10"><textarea rows={1} value={input} onChange={event => setInput(event.target.value)} onKeyDown={event => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); } }} placeholder="Ask about your work…" className="max-h-32 min-h-9 flex-1 resize-none bg-transparent px-2 py-2 text-[13px] text-[#1B1B2F] outline-none placeholder:text-[#9291A5]" /><button className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#6C5CE7] text-white transition hover:bg-[#4C3FBF] disabled:opacity-40" disabled={!input.trim() || loading} aria-label="Send"><Send className="h-4 w-4" /></button></form><p className="mt-2 text-center text-[8px] text-[#9291A5]">Review important decisions. Northstar never executes external actions without approval.</p></div>
+  </div></AppShell>;
+}

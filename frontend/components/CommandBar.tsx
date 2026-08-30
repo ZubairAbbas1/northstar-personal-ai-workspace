@@ -1,0 +1,12 @@
+"use client";
+
+import { ArrowUp, Compass, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+
+export function CommandBar({ compact = false }: { compact?: boolean }) {
+  const router = useRouter(); const [value, setValue] = useState("");
+  const submit = (event: FormEvent) => { event.preventDefault(); const prompt = value.trim(); router.push(prompt ? `/assistant?prompt=${encodeURIComponent(prompt)}` : "/assistant"); };
+  if (compact) return <form onSubmit={submit} className="group flex h-10 min-w-0 flex-1 items-center gap-2 rounded-xl border border-[#E4E3F5] bg-white px-3 transition focus-within:border-[#6C5CE7] focus-within:ring-4 focus-within:ring-[#6C5CE7]/10 md:max-w-xl"><Sparkles className="h-3.5 w-3.5 shrink-0 text-[#6C5CE7]" /><input value={value} onChange={event => setValue(event.target.value)} aria-label="Ask Northstar" className="min-w-0 flex-1 bg-transparent text-[13px] text-[#1B1B2F] outline-none placeholder:text-[#9291A5]" placeholder="Ask Northstar…" /><button aria-label="Send to Northstar" className="grid h-6 w-6 shrink-0 place-items-center rounded-lg text-[#6C5CE7] opacity-60 transition group-focus-within:bg-[#EEEDFE] group-focus-within:opacity-100"><ArrowUp className="h-3.5 w-3.5" /></button></form>;
+  return <div className="rounded-[18px] border border-[#DEDCEF] bg-white p-3 shadow-[0_12px_36px_rgba(27,27,47,.055)] sm:p-4"><form onSubmit={submit} className="flex items-center gap-3 rounded-[14px] bg-[#F7F7FC] px-3 py-2 ring-1 ring-[#E4E3F5] transition focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C5CE7]/35 sm:px-4"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#EEEDFE] text-[#6C5CE7]"><Compass className="h-[18px] w-[18px]" /></span><input value={value} onChange={event => setValue(event.target.value)} aria-label="What do you need to get done?" className="min-w-0 flex-1 bg-transparent py-2 text-[14px] text-[#1B1B2F] outline-none placeholder:text-[#86859A] sm:text-[15px]" placeholder="What do you need to get done?" /><button className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#6C5CE7] text-white transition hover:-translate-y-0.5 hover:bg-[#4C3FBF]" aria-label="Ask Northstar"><ArrowUp className="h-4 w-4" /></button></form><p className="mt-2 px-1 text-[10px] text-[#9291A5]">Ask about inbox, schedule, priorities, GitHub, or anything in your workspace.</p></div>;
+}

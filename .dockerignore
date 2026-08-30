@@ -1,0 +1,16 @@
+.git
+.env
+.venv
+__pycache__
+*.py[cod]
+*.db
+.pytest_cache
+chroma_db
+node_modules
+.next
+work
+.runlogs
+.langgraph_api
+secrets
+tokens
+*.log

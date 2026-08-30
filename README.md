@@ -7,11 +7,19 @@
 [![CI](https://github.com/ZubairAbbas1/northstar-personal-ai-workspace/actions/workflows/ci.yml/badge.svg)](https://github.com/ZubairAbbas1/northstar-personal-ai-workspace/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
-An open-source, multi-user **AI Executive Assistant & Productivity Workspace** designed around one core mission:
+An open-source, self-hosted, multi-user **AI Executive Assistant & Productivity Workspace** designed around one core mission:
 
 > **"One intelligent workspace that understands what is happening across your work and helps you determine what deserves your attention next."**
 
 Built with **Next.js 14 (TypeScript and Tailwind CSS)**, **FastAPI (Python 3.11)**, a tenant-safe assistant gateway, **Model Context Protocol (MCP)** workflows, and an **AES-256-GCM BYOK Vault**.
+
+## Self-hosted by design
+
+Northstar does not require a Northstar cloud account, paid domain, or centrally hosted service. Each person can clone or download this repository and run the frontend and backend on their own computer. Their accounts, database, memories, and encrypted integration credentials remain in that installation.
+
+Provider credentials are deliberately not bundled in the public repository. A self-hoster creates their own Google and GitHub OAuth applications and puts those client credentials in their local `.env`; Northstar then lets every user of that installation authorize their own provider account. Discord uses a user-created bot token, and AI can use a local Ollama model or the self-hoster's provider key.
+
+See [SELF_HOSTING.md](SELF_HOSTING.md) for the complete localhost installation and connection guide.
 
 ---
 
@@ -84,9 +92,9 @@ graph TD
 
 ## 🚀 Quickstart & Setup
 
-### Option A: Local Development (Zero Configuration Needed)
+### Option A: Local Development
 
-The project includes an out-of-the-box **SQLite database** and sample fallback intelligence, so you can spin it up immediately without configuring cloud databases.
+The core workspace includes an out-of-the-box **SQLite database**, so it can run without a cloud database. Live Google, GitHub, Discord, and hosted AI connections require the self-hoster's own provider credentials; see [SELF_HOSTING.md](SELF_HOSTING.md).
 
 #### 1. Backend Setup
 

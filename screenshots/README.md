@@ -8,6 +8,15 @@ This directory stores sanitized demonstration screenshots for public presentatio
 - **`northstar-social-preview.svg`** — Privacy-safe GitHub repository banner with the Northstar brand and a synthetic workspace overview. Use it as the repository's Social preview image.
 - **`northstar-social-preview.jpg`** — Rendered 1280×640 JPG export for GitHub's Social preview uploader.
 
+### LinkedIn carousel set
+
+These four synthetic, privacy-safe screens are sized for a LinkedIn carousel:
+
+- `linkedin-dashboard.svg` — command-center overview
+- `linkedin-inbox.svg` — smart inbox triage
+- `linkedin-assistant.svg` — grounded assistant conversation
+- `linkedin-integrations.svg` — connected tools and permissions
+
 > **Privacy Warning**: Never commit screenshots containing sensitive real personal email addresses, private calendar events, or confidential project credentials. Use sanitized demo data.
 
 ---

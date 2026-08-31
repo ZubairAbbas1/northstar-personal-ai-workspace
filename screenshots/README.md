@@ -2,6 +2,10 @@
 
 This directory stores sanitized demonstration screenshots for public presentation.
 
+### Available preview
+
+- **`product-preview.svg`** — Synthetic Northstar Assistant command-deck preview used in the root README. It contains no account or workspace data.
+
 > **Privacy Warning**: Never commit screenshots containing sensitive real personal email addresses, private calendar events, or confidential project credentials. Use sanitized demo data.
 
 ---

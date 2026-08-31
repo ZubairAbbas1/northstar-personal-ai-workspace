@@ -21,6 +21,14 @@ Provider credentials are deliberately not bundled in the public repository. A se
 
 See [SELF_HOSTING.md](SELF_HOSTING.md) for the complete localhost installation and connection guide.
 
+## Product preview
+
+The workspace brings your assistant, priorities, and connected work context into one calm command deck:
+
+![Northstar Assistant workspace](screenshots/product-preview.svg)
+
+This screenshot is a sanitized demo capture with no real email, calendar, or message content. See the [screenshots guide](screenshots/README.md) for the planned demo capture set.
+
 ---
 
 ## 🌟 What Makes This Special?

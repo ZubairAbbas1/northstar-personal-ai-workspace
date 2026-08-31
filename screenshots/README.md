@@ -17,6 +17,8 @@ These four synthetic, privacy-safe screens are sized for a LinkedIn carousel:
 - `linkedin-assistant.svg` — grounded assistant conversation
 - `linkedin-integrations.svg` — connected tools and permissions
 
+Each screen also has a rendered `.jpg` export with the same filename for direct LinkedIn upload.
+
 > **Privacy Warning**: Never commit screenshots containing sensitive real personal email addresses, private calendar events, or confidential project credentials. Use sanitized demo data.
 
 ---

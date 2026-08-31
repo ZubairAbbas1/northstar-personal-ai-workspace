@@ -29,6 +29,8 @@ The workspace brings your assistant, priorities, and connected work context into
 
 This screenshot is a sanitized demo capture with no real email, calendar, or message content. See the [screenshots guide](screenshots/README.md) for the planned demo capture set.
 
+For the repository preview shown when sharing Northstar on GitHub, use the privacy-safe [social preview banner](screenshots/northstar-social-preview.svg) in **Settings → General → Social preview**.
+
 ---
 
 ## 🌟 What Makes This Special?

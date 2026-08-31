@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">Northstar Personal AI Workspace</title>
+  <desc id="desc">A calm open-source command deck for inbox, calendar, tasks, and connected work.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1224"/>
+      <stop offset="0.55" stop-color="#172554"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.84" cy="0.12" r="0.7">
+      <stop offset="0" stop-color="#60a5fa" stop-opacity="0.36"/>
+      <stop offset="1" stop-color="#60a5fa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#020617" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="640" rx="28" fill="url(#bg)"/>
+  <rect width="1280" height="640" rx="28" fill="url(#glow)"/>
+
+  <g opacity="0.42" fill="#bfdbfe">
+    <circle cx="1020" cy="92" r="3"/><circle cx="1090" cy="150" r="2"/><circle cx="1180" cy="90" r="2"/>
+    <circle cx="930" cy="210" r="2"/><circle cx="1140" cy="260" r="3"/><circle cx="1220" cy="185" r="2"/>
+  </g>
+  <path d="M930 125 C1040 38 1145 80 1265 18" fill="none" stroke="#93c5fd" stroke-opacity="0.24" stroke-width="2"/>
+
+  <g transform="translate(80 88)">
+    <rect width="72" height="72" rx="22" fill="#2563eb"/>
+    <path d="M36 16 41 30 56 35 41 40 36 55 31 40 16 35 31 30Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="56" cy="18" r="4" fill="#fff"/>
+  </g>
+
+  <text x="178" y="121" fill="#ffffff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="58" font-weight="750" letter-spacing="-2">Northstar</text>
+  <text x="182" y="170" fill="#bfdbfe" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="24" font-weight="500">Personal AI Workspace</text>
+  <text x="82" y="251" fill="#e0e7ff" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="25" font-weight="450">One calm command deck for everything competing for your attention.</text>
+
+  <g filter="url(#shadow)" transform="translate(82 318)">
+    <rect width="1116" height="238" rx="22" fill="url(#card)" stroke="#bfdbfe" stroke-opacity="0.23"/>
+    <rect x="28" y="28" width="246" height="182" rx="16" fill="#0f172a" fill-opacity="0.68"/>
+    <text x="52" y="65" fill="#93c5fd" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="1.3">NORTHSTAR</text>
+    <g fill="#cbd5e1" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17">
+      <text x="52" y="105">◈  Overview</text><text x="52" y="141">▣  Inbox</text><text x="52" y="177">□  Tasks</text>
+    </g>
+    <rect x="306" y="28" width="780" height="182" rx="16" fill="#f8fafc" fill-opacity="0.97"/>
+    <text x="340" y="67" fill="#0f172a" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="700">Your day, in one view</text>
+    <g font-family="Inter,Segoe UI,Arial,sans-serif">
+      <rect x="340" y="88" width="220" height="92" rx="12" fill="#eff6ff"/>
+      <text x="360" y="116" fill="#2563eb" font-size="13" font-weight="700">INBOX</text>
+      <text x="360" y="148" fill="#0f172a" font-size="26" font-weight="750">12</text>
+      <text x="402" y="148" fill="#64748b" font-size="14">messages to triage</text>
+      <rect x="582" y="88" width="220" height="92" rx="12" fill="#ecfdf5"/>
+      <text x="602" y="116" fill="#059669" font-size="13" font-weight="700">CALENDAR</text>
+      <text x="602" y="148" fill="#0f172a" font-size="26" font-weight="750">3</text>
+      <text x="644" y="148" fill="#64748b" font-size="14">meetings today</text>
+      <rect x="824" y="88" width="220" height="92" rx="12" fill="#eef2ff"/>
+      <text x="844" y="116" fill="#4f46e5" font-size="13" font-weight="700">NEXT BEST ACTION</text>
+      <text x="844" y="148" fill="#0f172a" font-size="15" font-weight="650">Review launch brief</text>
+      <text x="844" y="169" fill="#64748b" font-size="13">91 / 100 priority</text>
+    </g>
+  </g>
+
+  <g transform="translate(82 594)" fill="#bfdbfe" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16">
+    <text x="0">Open source</text><circle cx="112" cy="-5" r="2"/><text x="132">Self-hosted</text><circle cx="255" cy="-5" r="2"/><text x="275">Private by design</text>
+  </g>
+</svg>

@@ -6,6 +6,7 @@ This directory stores sanitized demonstration screenshots for public presentatio
 
 - **`product-preview.svg`** — Synthetic Northstar Assistant command-deck preview used in the root README. It contains no account or workspace data.
 - **`northstar-social-preview.svg`** — Privacy-safe GitHub repository banner with the Northstar brand and a synthetic workspace overview. Use it as the repository's Social preview image.
+- **`northstar-social-preview.jpg`** — Rendered 1280×640 JPG export for GitHub's Social preview uploader.
 
 > **Privacy Warning**: Never commit screenshots containing sensitive real personal email addresses, private calendar events, or confidential project credentials. Use sanitized demo data.
 
